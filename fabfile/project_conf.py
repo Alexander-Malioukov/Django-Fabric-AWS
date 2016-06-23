@@ -44,6 +44,9 @@ fabconf['APPS_DIR'] = "/home/%s/webapps" % fabconf['SERVER_USERNAME']
 fabconf[
     'PROJECT_PATH'] = "%s/%s" % (fabconf['APPS_DIR'], fabconf['PROJECT_NAME'])
 
+# Your Django's version "run migrations" command
+fabconf['RUN_MIGRATIONS_CMD'] = "python %s/manage.py syncdb" % fabconf['PROJECT_PATH']
+
 # App domains
 fabconf['DOMAINS'] = "example.com www.example.com"
 
@@ -107,6 +110,5 @@ ec2_secgroups = ['MySecurityGroup']
 # API Name of instance type. http://bit.ly/mkWvpn
 ec2_instancetype = 't1.micro'
 
-# Existing instances - add the public dns of your instances here when you
-# have spawned them
+# Existing instances - add the public dns of your instances here when you have spawned them
 fabconf['EC2_INSTANCES'] = [""]

@@ -1,4 +1,4 @@
-'''
+"""
 --------------------------------------------------------------------------------------
 tasks.py
 --------------------------------------------------------------------------------------
@@ -27,7 +27,7 @@ Tasks include:
     - reload_supervisor : Pushes the supervisor config files to the servers and restarts the supervisor, use this if you
                           have made changes to templates/supervisord-init or templates/supervisord.conf
 
-'''
+"""
 
 # Spawns a new EC2 instance (as definied in djangofab_conf.py) and return's it's public dns
 # This takes around 8 minutes to complete.
@@ -129,9 +129,9 @@ configure_instance = [
   {"action":"sudo", "params":"chown root:root /etc/nginx/sites-available/%(PROJECT_NAME)s"},
   {"action":"sudo", "params":"/etc/init.d/nginx restart", "message":"Restarting nginx"},
 
-  # Run collectstatic and syncdb
+  # Run collectstatic and migrate
   {"action":"virtualenv", "params":"python %(PROJECT_PATH)s/manage.py collectstatic -v 0 --noinput"},
-  {"action":"virtualenv", "params":"python %(PROJECT_PATH)s/manage.py syncdb"},
+  {"action":"virtualenv", "params": "%(RUN_MIGRATIONS_CMD)s"},
 
 
   # Setup supervisor
@@ -168,7 +168,7 @@ deploy = [
 
   # Update the database
   {"action":"virtualenv", "params":"python %(PROJECT_PATH)s/manage.py collectstatic -v 0 --noinput"},
-  {"action":"virtualenv", "params":"python %(PROJECT_PATH)s/manage.py syncdb"},
+  {"action":"virtualenv", "params":"python %(PROJECT_PATH)s/manage.py migrate"},
 
   # Restart gunicorn to update the site
   {"action":"sudo", "params": "supervisorctl restart %(PROJECT_NAME)s"}
