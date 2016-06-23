@@ -1,4 +1,4 @@
-''' 
+'''
 --------------------------------------------------------------------------------------
 django_fabric_aws.py
 --------------------------------------------------------------------------------------
@@ -9,30 +9,30 @@ credit : Derived from files in https://github.com/gcollazo/Fabulous
 date   : 11 / 3 / 2014
 
 Commands include:
-    - fab spawn instance  
+    - fab spawn instance
         - Spawns a new EC2 instance (as definied in project_conf.py) and return's it's public dns
           This takes around 8 minutes to complete.
- 
+
     - fab update_packages
-        - Updates the python packages on the server to match those found in requirements/common.txt and 
+        - Updates the python packages on the server to match those found in requirements/common.txt and
           requirements/prod.txt
- 
+
     - fab deploy
-        - Pulls the latest commit from the master branch on the server, collects the static files, syncs the db and                   
+        - Pulls the latest commit from the master branch on the server, collects the static files, syncs the db and
           restarts the server
- 
+
     - fab reload_gunicorn
-        - Pushes the gunicorn startup script to the servers and restarts the gunicorn process, use this if you 
+        - Pushes the gunicorn startup script to the servers and restarts the gunicorn process, use this if you
           have made changes to templates/start_gunicorn.bash
- 
+
     - fab reload_nginx
-        - Pushes the nginx config files to the servers and restarts the nginx, use this if you 
+        - Pushes the nginx config files to the servers and restarts the nginx, use this if you
           have made changes to templates/nginx-app-proxy or templates/nginx.conf
 
     - fab reload_supervisor
-        - Pushes the supervisor config files to the servers and restarts the supervisor, use this if you 
+        - Pushes the supervisor config files to the servers and restarts the supervisor, use this if you
           have made changes to templates/supervisord-init or templates/supervisord.conf
-    
+
     - fab manage:command="management command"
         - Runs a python manage.py command on the server. To run this command we need to specify an argument, eg for syncdb
           type the command -> fab manage:command="syncdb --no-input"
@@ -53,7 +53,7 @@ env.key_filename = fabconf['SSH_PRIVATE_KEY_PATH']
 
 # List of EC2 instances to work on
 env.hosts = fabconf['EC2_INSTANCES']
-         
+
 # ------------------------------------------------------------------------------------------------------------------
 # MAIN FABRIC TASKS - Type fab <function_name> in the command line to execute any one of these
 # ------------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ def instance():
     env.host_string = _create_ec2_instance()
     print(_green("Waiting 60 seconds for server to boot..."))
     time.sleep(60)
-    
+
     # Configure the instance that was just created
     for item in tasks.configure_instance:
         try:
@@ -82,7 +82,7 @@ def instance():
         except KeyError:
             pass
         globals()["_" + item['action']](item['params'])
-    
+
     # Print out the final runtime and the public dns of the new instance
     end_time = time.time()
     print(_green("Runtime: %f minutes" % ((end_time - start_time) / 60)))
@@ -94,14 +94,14 @@ def instance():
 
 def deploy():
     """
-    Pulls the latest commit from bitbucket, resyncs the database, collects the static files and restarts the
+    Pulls the latest commit from the remote git repo, resyncs the database, collects the static files and restarts the
     server.
     """
-    _run_task(tasks.deploy, "Updating server to latest commit in the bitbucket repo...", "Finished updating the server")
+    _run_task(tasks.deploy, "Updating server to latest commit in the remote repo...", "Finished updating the server")
 
 def update_packages():
     """
-    Updates the python packages on the server as defined in requirements/common.txt and 
+    Updates the python packages on the server as defined in requirements/common.txt and
     requirements/prod.txt
     """
     _run_task(tasks.update_packages, "Updating server packages with pip...", "Finished updating python packages")
@@ -128,7 +128,7 @@ def manage(command):
     """
     Runs a python manage.py command on the server
     """
-    
+
     # Get the instances to run commands on
     env.hosts = fabconf['EC2_INSTANCES']
 
@@ -183,7 +183,7 @@ def _create_ec2_instance():
 
     instance = reservation.instances[0]
     conn.create_tags([instance.id], {"Name":fabconf['INSTANCE_NAME_TAG']})
-    
+
     while instance.state == u'pending':
         print(_yellow("Instance state: %s" % instance.state))
         time.sleep(10)
@@ -191,7 +191,7 @@ def _create_ec2_instance():
 
     print(_green("Instance state: %s" % instance.state))
     print(_green("Public dns: %s" % instance.public_dns_name))
-    
+
     return instance.public_dns_name
 
 def _virtualenv(params):
